@@ -105,6 +105,7 @@ type config struct {
 	traces          tracesConfig
 	middleware      middlewareConfig
 	internalTracing internalTracingConfig
+	enableLBAC      bool
 }
 
 type debugConfig struct {
@@ -667,6 +668,7 @@ func main() {
 						metricslegacy.WithSpanRoutePrefix("/api/v1/{tenant}"),
 						metricslegacy.WithQueryMiddleware(authorization.WithAuthorizers(authorizers, rbac.Read, "metrics")),
 						metricslegacy.WithQueryMiddleware(metricsv1.WithEnforceTenancyOnQuery(cfg.metrics.tenantLabel, queryParamName)),
+						metricslegacy.WithQueryMiddleware(metricsv1.WithLBAC(cfg.enableLBAC, queryParamName)),
 						metricslegacy.WithUIMiddleware(authorization.WithAuthorizers(authorizers, rbac.Read, "metrics")),
 					))
 
@@ -684,6 +686,7 @@ func main() {
 						metricsv1.WithWriteMiddleware(authorization.WithAuthorizers(authorizers, rbac.Write, "metrics")),
 						metricsv1.WithQueryMiddleware(authorization.WithAuthorizers(authorizers, rbac.Read, "metrics")),
 						metricsv1.WithQueryMiddleware(metricsv1.WithEnforceTenancyOnQuery(cfg.metrics.tenantLabel, queryParamName)),
+						metricsv1.WithQueryMiddleware(metricsv1.WithLBAC(cfg.enableLBAC, queryParamName)),
 						metricsv1.WithReadMiddleware(authorization.WithAuthorizers(authorizers, rbac.Read, "metrics")),
 						metricsv1.WithReadMiddleware(metricsv1.WithEnforceTenancyOnQuery(cfg.metrics.tenantLabel, matchParamName)),
 						metricsv1.WithReadMiddleware(metricsv1.WithEnforceAuthorizationLabels()),
@@ -1060,6 +1063,8 @@ func parseFlags() (config, error) {
 	)
 
 	cfg := config{}
+	flag.BoolVar(&cfg.enableLBAC, "enableLBAC", true,
+		"Enable label based access control")
 	flag.StringVar(&cfg.rbacConfigPath, "rbac.config", "rbac.yaml",
 		"Path to the RBAC configuration file.")
 	flag.StringVar(&cfg.tenantsConfigPath, "tenants.config", "tenants.yaml",

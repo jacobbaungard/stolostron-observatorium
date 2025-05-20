@@ -1,0 +1,9 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: mcoa-sa-cr-example
+  namespace: open-cluster-management-observability
+rules:
+  - apiGroups: ["observability.open-cluster-management.io"]
+    resources: ["ObservabilityAddonRole"]
+    verbs: ["get", "list"]

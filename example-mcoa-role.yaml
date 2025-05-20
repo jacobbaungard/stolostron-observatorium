@@ -1,0 +1,11 @@
+apiVersion: "observability.open-cluster-management.io/v1"
+kind: ObservabilityAddonRole
+metadata:
+  name: example-mcoa-role
+  namespace: open-cluster-management-observability
+spec:
+  actions:
+    - "metrics:read"
+  scopes:
+    - cluster="managed-cluster-1"
+    - namespace="dev-namespace-1"

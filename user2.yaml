@@ -1,0 +1,68 @@
+# we give user basic-user access for general OCP access
+# and ACM admin so the original ACM rbac proxy doesn't
+# interfere (this will not be needed later).
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: user2-basic-user
+subjects:
+  - kind: User
+    apiGroup: rbac.authorization.k8s.io
+    name: user2
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: basic-user
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: user2-acm-admin
+subjects:
+  - kind: User
+    apiGroup: rbac.authorization.k8s.io
+    name: user2
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: open-cluster-management:cluster-manager-admin
+---
+apiVersion: "observability.open-cluster-management.io/v1"
+kind: ObservabilityAddonRole
+metadata:
+  name: user2-mcoa-role
+  namespace: open-cluster-management-observability
+spec:
+  actions:
+    - "metrics:read"
+  scopes:
+    - namespace="openshift-monitoring"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: user2-mcoa-kube-role
+  namespace: open-cluster-management-observability
+rules:
+  - verbs:
+      - get
+    apiGroups:
+      - observability.open-cluster-management.io
+    resources:
+      - observabilityaddonroles
+    resourceNames:
+      - user2-mcoa-role
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: user2-mcoa-kube-rb
+  namespace: open-cluster-management-observability
+subjects:
+- kind: User
+  name: user2
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: user2-mcoa-kube-role
+  apiGroup: rbac.authorization.k8s.io

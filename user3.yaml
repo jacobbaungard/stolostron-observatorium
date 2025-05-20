@@ -1,0 +1,65 @@
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: user3-basic-user
+subjects:
+  - kind: User
+    apiGroup: rbac.authorization.k8s.io
+    name: user3
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: basic-user
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: user3-acm-admin
+subjects:
+  - kind: User
+    apiGroup: rbac.authorization.k8s.io
+    name: user3
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: open-cluster-management:cluster-manager-admin
+---
+apiVersion: "observability.open-cluster-management.io/v1"
+kind: ObservabilityAddonRole
+metadata:
+  name: user3-mcoa-role
+  namespace: open-cluster-management-observability
+spec:
+  actions:
+    - "metrics:read"
+  scopes:
+    - cluster=~"sno-authz-1|sno-authz-2"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: user3-mcoa-kube-role
+  namespace: open-cluster-management-observability
+rules:
+  - verbs:
+      - get
+    apiGroups:
+      - observability.open-cluster-management.io
+    resources:
+      - observabilityaddonroles
+    resourceNames:
+      - user3-mcoa-role
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: user3-mcoa-kube-rb
+  namespace: open-cluster-management-observability
+subjects:
+- kind: User
+  name: user3
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: user3-mcoa-kube-role
+  apiGroup: rbac.authorization.k8s.io

@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: mcoa-authz-rb
+  namespace: open-cluster-management-observability
+subjects:
+- kind: User
+  name: user1
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: mcoa-cr-example
+  apiGroup: rbac.authorization.k8s.io

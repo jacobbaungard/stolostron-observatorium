@@ -1,0 +1,16 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: user1-cluster-role
+  namespace: open-cluster-management-observability
+rules:
+- apiGroups:
+  - observability.open-cluster-management.io
+  resources:
+  - observabilityaddonroles
+  resourceNames:
+  - example-mcoa-role
+  verbs:
+  - get
+  - watch
+  - list
